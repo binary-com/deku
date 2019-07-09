@@ -12,13 +12,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='sample',
+    name='deku',
     version='0.1.0',
-    description='Sample package for Python-Guide.org',
+    description='Python service for seamless rolling updates of docker services',
     long_description=readme,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='https://github.com/kennethreitz/samplemod',
+    author='Apoorv Joshi',
+    author_email='me@apoorv.space',
+    url='https://github.com/4p00rv/deku',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
