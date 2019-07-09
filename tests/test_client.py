@@ -22,7 +22,7 @@ class ClientTestSuite(unittest.TestCase):
         # Handle exception when client is not running
         docker.ping = Mock(side_effect=Exception('Docker client is unavailable'))
         self.assertRaises(Exception, client.is_running())
-        logging.warn.assert_called_once_with('Docker service was down: Docker client is unavailable')
+        logging.warn.assert_called_once_with('Docker service is down: Docker client is unavailable')
 
 
 if __name__ == '__main__':
