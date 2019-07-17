@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import deku
+from .context import Services
 import docker
 
 import unittest
@@ -12,29 +12,10 @@ except ImportError:
 class ServicesTestSuite(unittest.TestCase):
     """Test deku services"""
 
-    @mock.patch('deku.services.logging')
-    def test_client(self, logging):
-        dockerClient = mock.Mock()
-        dockerClient.ping.return_value = True
-        logging.warn = mock.Mock()
-
-        # Check if client is running
-        services = deku.services.Services(dockerClient)
-        self.assertTrue(services.is_docker_running)
-
-        # Handle docker api-error exception
-        dockerClient.ping = mock.Mock(side_effect=docker.errors.APIError('Docker client is unavailable'))
-        services.is_docker_running()
-        logging.warn.assert_called_with('Docker service is down: Docker client is unavailable')
-        # Handle all other exceptions
-        dockerClient.ping = mock.Mock(side_effect=Exception())
-        services.is_docker_running()
-        logging.warn.assert_called_with('Docker service is down: Unexpected error occured')
-
     def test_list_services(self):
         dockerClient = mock.Mock()
         dockerClient.ping.return_value = False
-        services = deku.services.Services(dockerClient)
+        services = Services(dockerClient)
         # Return empty array when docker is down.
         self.assertEqual(services.get(), [])
         dockerClient.ping.return_value = True
@@ -49,7 +30,7 @@ class ServicesTestSuite(unittest.TestCase):
         dockerClient.services = mock.Mock()
         # When there's no service to update
         dockerClient.services.list.return_value = []
-        services = deku.services.Services(dockerClient)
+        services = Services(dockerClient)
         args = { "filters": {"name":"odin_service"} }
         resp = services.update(**args)
         dockerClient.services.list.assert_called_with(filters=args['filters'])
@@ -65,7 +46,7 @@ class ServicesTestSuite(unittest.TestCase):
         # when updating service runs into an exception
         mockService.update = mock.Mock(side_effect=docker.errors.APIError('Some weird error'))
         dockerClient.services.list.return_value = [mockService]
-        services = deku.services.Services(dockerClient)
+        services = Services(dockerClient)
         args = {'update_config': {'image': 'repo/image:tag'}}
         resp = services.update(**args)
         self.assertEqual({'odin': {'Message': 'Update failed with error "Some weird error"', 'Status': 'failed'}}, resp)
@@ -86,7 +67,7 @@ class ServicesTestSuite(unittest.TestCase):
         get_attrs = lambda attr: service_dict[attr]
         mockService.attrs.get = mock.MagicMock(side_effect=get_attrs)
         dockerClient.services.list.return_value = [mockService]
-        services = deku.services.Services(dockerClient)
+        services = Services(dockerClient)
         resp = services.get_status()
         self.assertEqual(resp, {'thor': {'Image': 'Good', 'Message': 'There is always some good in bad', 'Status': 'Updating'}})
         
