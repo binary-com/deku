@@ -1,4 +1,4 @@
-from .context import UpdateEndpoint
+from .context import UpdateEndpoint, Authorize
 import docker
 
 import unittest
@@ -8,6 +8,10 @@ except ImportError:
     import mock
 
 class ServerTestSuite(unittest.TestCase):
+
+    def test_authorize(self):
+        self.assertFalse(Authorize('abcd'))
+        self.assertTrue(Authorize('DEKU_TEST_TOKEN'))
     
     @mock.patch('deku.server.flask')
     @mock.patch('deku.server.docker')
@@ -22,14 +26,17 @@ class ServerTestSuite(unittest.TestCase):
 
         with mock.patch('deku.server.Services', side_effect=lambda base_url=None: mockClient):
             with mock.patch('deku.server.flask.request.values.get', side_effect=get_arg):
-                args = { 'name': 'rpc' }
-                mockFlask.request.value.get.side_effect = get_arg
-                res = UpdateEndpoint()
-                mockClient.get_status.assert_called_with(filters=args)
-                args = { 'name': 'api', 'image': 'SomeImage' }
-                res = UpdateEndpoint()
-                func_args = { 'update_config': {'image': args['image']}, 'filters': {'name': args['name']} }
-                mockClient.update.assert_called_with(**func_args)
+                with mock.patch('deku.server.flask.Response', side_effect=lambda **kwargs: 'error'):
+                    args = { 'name': 'rpc' }
+                    res = UpdateEndpoint()
+                    self.assertEqual(res, 'error')
+                    args = { 'name': 'rpc','secret': 'DEKU_TEST_TOKEN' }
+                    res = UpdateEndpoint()
+                    mockClient.get_status.assert_called_with(filters={'name': args['name']})
+                    args['image'] = 'SomeImage'
+                    res = UpdateEndpoint()
+                    func_args = { 'update_config': {'image': args['image']}, 'filters': {'name': args['name']} }
+                    mockClient.update.assert_called_with(**func_args)
 
 if __name__ == '__main__':
     unittest.main()
