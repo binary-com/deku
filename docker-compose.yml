@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  deku:
+    image: deku:latest
+    ports: 
+      - 19231:19231
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

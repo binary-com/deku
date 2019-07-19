@@ -19,7 +19,7 @@ def authorize(token):
 @app.route('/update', methods=['POST'])
 def update():
     token = flask.request.values.get('secret')
-    if not authorize(token): return flask.Response(response=UNAUTHORIZE_RESPONSE, status_code=500)
+    if not authorize(token): return {'error': UNAUTHORIZE_RESPONSE}
 
     label = flask.request.values.get('label')
     name = flask.request.values.get('name')
@@ -42,4 +42,4 @@ def update():
         return services_obj.get_status(filters=service_filter)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=19231)

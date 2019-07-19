@@ -26,17 +26,16 @@ class ServerTestSuite(unittest.TestCase):
 
         with mock.patch('deku.server.Services', side_effect=lambda base_url=None: mockClient):
             with mock.patch('deku.server.flask.request.values.get', side_effect=get_arg):
-                with mock.patch('deku.server.flask.Response', side_effect=lambda **kwargs: 'error'):
-                    args = { 'name': 'rpc' }
-                    res = UpdateEndpoint()
-                    self.assertEqual(res, 'error')
-                    args = { 'name': 'rpc','secret': 'DEKU_TEST_TOKEN' }
-                    res = UpdateEndpoint()
-                    mockClient.get_status.assert_called_with(filters={'name': args['name']})
-                    args['image'] = 'SomeImage'
-                    res = UpdateEndpoint()
-                    func_args = { 'update_config': {'image': args['image']}, 'filters': {'name': args['name']} }
-                    mockClient.update.assert_called_with(**func_args)
+                args = { 'name': 'rpc' }
+                res = UpdateEndpoint()
+                self.assertEqual(res, {'error': 'Invalid secret.'})
+                args = { 'name': 'rpc','secret': 'DEKU_TEST_TOKEN' }
+                res = UpdateEndpoint()
+                mockClient.get_status.assert_called_with(filters={'name': args['name']})
+                args['image'] = 'SomeImage'
+                res = UpdateEndpoint()
+                func_args = { 'update_config': {'image': args['image']}, 'filters': {'name': args['name']} }
+                mockClient.update.assert_called_with(**func_args)
 
 if __name__ == '__main__':
     unittest.main()
