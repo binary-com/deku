@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  deku:
+    image: deku:latest
+    environment:
+      - DOCKER_SOCKET=unix://var/run/docker.sock
+      - AUTH_TOKEN=SOME_SUPER_SECURE_TOKEN
+    ports: 
+      - 19231:19231
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
